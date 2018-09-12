@@ -72,9 +72,9 @@ values."
      (python :variables
              python-shell-completion-native nil
              python-test-runner 'pytest
-             python-enable-yapf-format-on-save t)
-     ipython-notebook
-     django
+             python-enable-yapf-format-on-save nil)
+     ;; ipython-notebook
+     ;; django
      restructuredtext
      (chinese :packages youdao-dictionary fcitx
               :variables chinese-enable-fcitx nil
@@ -94,6 +94,10 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(youdao-dictionary
                                       xah-replace-pairs
+									  ag
+									  cal-china-x
+									  electric-spacing
+									  ess
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -173,7 +177,7 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
+   dotspacemacs-default-font '("DejaVu Sans Mono"
                                :size 14
                                :weight normal
                                :width normal
@@ -386,8 +390,8 @@ you should place your code here."
 
   ;;解决org表格里面中英文对齐的问题
   (when (configuration-layer/layer-usedp 'chinese)
-    (when (and (spacemacs/system-is-mac) window-system)
-      (spacemacs//set-monospaced-font "Source Code Pro" "Hiragino Sans GB" 14 16)))
+    (when (and (spacemacs/system-is-linux) window-system)
+      (spacemacs//set-monospaced-font "DejaVu Sans Mono" "文泉驿等宽微米黑" 14 16)))
 
   ;; Setting Chinese Font
   (when (and (spacemacs/system-is-mswindows) window-system)
@@ -462,15 +466,60 @@ you should place your code here."
             "* %?"
             :empty-lines 1)))
   ;; (add-hook 'term-mode-hook 'toggle-truncate-lines)
+  (desktop-save-mode)
+  (desktop-read)
+  ;; https://github.com/emacs-helm/helm/wiki/FAQ#why-is-a-customizable-helm-source-nil
+  (require 'helm)
+  (defmethod helm-setup-user-source ((source helm-source-ffiles))
+    (helm-source-add-action-to-source-if
+     "Byte compile file(s) async"
+     'async-byte-compile-file
+     source
+     'helm-ff-candidates-lisp-p))
+  (setq helm-follow-mode-persistent t)
+
   (evil-set-initial-state 'inferior-python-mode 'emacs)
   (spacemacs/set-leader-keys "oy" 'youdao-dictionary-search-at-point+)
   (spacemacs/set-leader-keys "op" 'youdao-dictionary-search-at-point-tooltip)
+  (spacemacs/set-leader-keys "jQ" 'dumb-jump-go)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode
       "fi" (lambda () (interactive) (message (python-info-current-defun)))
       "fa" 'beginning-of-defun
       "fe" 'end-of-defun
       "fh" 'python-mark-defun
   )
+
+  ;; helm-find-files ignored pattern is on helm-boring-file-regexp-list.
+  (setq helm-ff-skip-boring-files 't)
+  (setq neo-show-hidden-files nil)
+  (setq debug-on-error t)
+  (require 'cal-china-x)
+  (setq mark-holidays-in-calendar t)
+  (setq cal-china-x-important-holidays cal-china-x-chinese-holidays)
+  (setq cal-china-x-general-holidays '((holiday-lunar 1 15 "元宵节")))
+  (setq calendar-holidays
+      (append cal-china-x-important-holidays
+              cal-china-x-general-holidays
+              )) 
+  (add-hook 'python-mode-hook 'electric-spacing-mode)
+
+  (defun qiang-comment-dwim-line (&optional arg)
+    "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line, then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+    (interactive "*P")
+    (comment-normalize-vars)
+    (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+        (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+      (comment-dwim arg)))
+  (global-set-key "\M-;" 'qiang-comment-dwim-line)
+  
+  ;;; bind key recentf-ido-find-file
+  (defun recentf-ido-find-file ()
+    "Find a recent file using ido."
+    (interactive)
+    (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+      (when file
+        (find-file file))))
+  
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -503,7 +552,8 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (paradox spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens paredit evil-args evil-anzu anzu org-plus-contrib evil undo-tree ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org symon string-inflection spaceline-all-the-icons smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el password-generator overseer org-bullets open-junk-file neotree nameless move-text macrostep lorem-ipsum link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag goto-chg google-translate golden-ratio font-lock+ flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-unimpaired evil-numbers evil-nerd-commenter eval-sexp-fu elisp-slime-nav editorconfig dumb-jump dotenv-mode doom-modeline diminish define-word counsel-projectile column-enforce-mode clean-aindent-mode centered-cursor-mode bind-map auto-highlight-symbol auto-compile aggressive-indent ace-window ace-link ace-jump-helm-line))))
+    (ox-reveal ess julia-mode auto-complete-rst zeal-at-point winum unfill org-category-capture org-mime fuzzy flymd ghub request-deferred deferred company-ansible vue-mode flycheck-pos-tip flycheck xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache ht edit-server jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode imenu-list dash-at-point counsel-dash helm-dash web-mode web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode simple-httpd less-css-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc insert-shebang helm-css-scss haml-mode fish-mode emmet-mode company-web web-completion-data company-tern dash-functional tern company-shell coffee-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra counsel-projectile counsel swiper ivy pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow launchctl htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md evil-magit magit magit-popup git-commit with-editor company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe spaceline powerline rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode hydra parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make pkg-info epl helm-flx helm-descbinds helm-ag google-translate flx-ido flx fancy-battery eyebrowse evil-mc evil-lisp-state smartparens evil-indent-plus iedit evil-exchange evil-escape evil-ediff evil-args anzu evil goto-chg undo-tree highlight f s diminish define-word clean-aindent-mode bind-key packed dash ace-jump-helm-line helm avy helm-core popup package-build spacemacs-theme ws-butler window-numbering which-key uuidgen use-package toc-org restart-emacs request quelpa projectile popwin persp-mode pcre2el paradox org-plus-contrib open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-matchit evil-iedit-state evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
+ '(safe-local-variable-values (quote ((encoding . UTF-8)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
