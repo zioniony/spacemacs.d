@@ -468,8 +468,8 @@ you should place your code here."
             :empty-lines 1)))
   ;; (add-hook 'term-mode-hook 'toggle-truncate-lines)
   (global-highlight-thing-mode)
-  (desktop-save-mode)
-  (desktop-read)
+  ;;(desktop-save-mode)
+  ;;(desktop-read)
   ;; https://github.com/emacs-helm/helm/wiki/FAQ#why-is-a-customizable-helm-source-nil
   (require 'helm)
   (defmethod helm-setup-user-source ((source helm-source-ffiles))
@@ -494,7 +494,7 @@ you should place your code here."
   ;; helm-find-files ignored pattern is on helm-boring-file-regexp-list.
   (setq helm-ff-skip-boring-files 't)
   (setq neo-show-hidden-files nil)
-  (setq debug-on-error t)
+  ;;(setq debug-on-error t)
   (require 'cal-china-x)
   (setq mark-holidays-in-calendar t)
   (setq cal-china-x-important-holidays cal-china-x-chinese-holidays)
