@@ -419,6 +419,10 @@ you should place your code here."
                 (sequence "REPEAT(r)"  "WAIT(w!)"  "|"  "PAUSED(p@/!)" "CANCELLED(c@/!)" )
                 (sequence "IDEA(i!)" "MAYBE(y!)" "STAGED(s!)" "WORKING(k!)" "|" "USED(u!/@)")
                 )))
+  (defun ly/set-python-path ()
+    "Restart Python inferior processes."
+    (interactive)
+    (setenv "PYTHONPATH" (concat ":/home/ly/work/bell_payment/.venv/lib/python36.zip:/home/ly/work/bell_payment/.venv/lib/python3.6:/home/ly/work/bell_payment/.venv/lib/python3.6/lib-dynload:/home/ly/.pyenv/versions/3.6.6/lib/python3.6:/home/ly/work/bell_payment/.venv/lib/python3.6/site-packages:/home/ly/.pyenv/versions/3.6.6/lib/python3.6/site-packages:" (getenv "PYTHONPATH"))))
   (defun open-time-log()
     (interactive)
     (find-file org-agenda-file-time-log)
@@ -476,12 +480,12 @@ you should place your code here."
   ;;(desktop-read)
   ;; https://github.com/emacs-helm/helm/wiki/FAQ#why-is-a-customizable-helm-source-nil
   (require 'helm)
-  (defmethod helm-setup-user-source ((source helm-source-ffiles))
-    (helm-source-add-action-to-source-if
-     "Byte compile file(s) async"
-     'async-byte-compile-file
-     source
-     'helm-ff-candidates-lisp-p))
+  ;(defmethod helm-setup-user-source ((source helm-source-ffiles))
+  ;  (helm-source-add-action-to-source-if
+  ;   "Byte compile file(s) async"
+  ;   'async-byte-compile-file
+  ;   source
+  ;   'helm-ff-candidates-lisp-p))
   (setq helm-follow-mode-persistent t)
 
   ;;(evil-set-initial-state 'inferior-python-mode 'emacs)
@@ -511,6 +515,7 @@ you should place your code here."
   (add-hook 'python-mode-hook 'electric-spacing-mode)
   (add-hook 'python-mode-hook 'sphinx-doc-mode)
   (add-hook 'sh-mode-hook 'show-wider-tab)
+  (add-hook 'pyvenv-pre-activate-hooks 'ly/set-python-path)
 
   (defun qiang-comment-dwim-line (&optional arg)
     "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line, then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
@@ -586,7 +591,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (sphinx-doc helm-org-rifle auto-complete-rst zeal-at-point winum unfill org-category-capture org-mime fuzzy flymd ghub request-deferred deferred company-ansible vue-mode flycheck-pos-tip flycheck xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache ht edit-server jinja2-mode ansible-doc ansible yaml-mode ox-reveal ox-gfm ein websocket pony-mode imenu-list dash-at-point counsel-dash helm-dash web-mode web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode simple-httpd less-css-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc insert-shebang helm-css-scss haml-mode fish-mode emmet-mode company-web web-completion-data company-tern dash-functional tern company-shell coffee-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra counsel-projectile counsel swiper ivy pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow launchctl htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md evil-magit magit magit-popup git-commit with-editor company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe spaceline powerline rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode hydra parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make pkg-info epl helm-flx helm-descbinds helm-ag google-translate flx-ido flx fancy-battery eyebrowse evil-mc evil-lisp-state smartparens evil-indent-plus iedit evil-exchange evil-escape evil-ediff evil-args anzu evil goto-chg undo-tree highlight f s diminish define-word clean-aindent-mode bind-key packed dash ace-jump-helm-line helm avy helm-core popup package-build spacemacs-theme ws-butler window-numbering which-key uuidgen use-package toc-org restart-emacs request quelpa projectile popwin persp-mode pcre2el paradox org-plus-contrib open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-matchit evil-iedit-state evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
+    (org-plus-contrib writeroom-mode visual-fill-column treemacs-projectile treemacs-evil pfuture closql emacsql-sqlite emacsql transient lv auto-complete-rst zeal-at-point unfill fuzzy flymd request-deferred deferred company-ansible vue-mode flycheck-pos-tip xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode dash-at-point counsel-dash helm-dash web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode less-css-mode json-snatcher json-reformat js2-refactor js-doc insert-shebang helm-css-scss fish-mode emmet-mode company-web web-completion-data company-tern dash-functional company-shell coffee-mode yapfify pyenv-mode py-isort hy-mode helm-pydoc anaconda-mode youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy org org-pomodoro alert log4e gntp mmm-mode markdown-toc magit-gitflow launchctl helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-messenger gh-md company-statistics company auto-yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode parent-mode helm-themes helm-swoop helm-projectile helm-mode-manager pkg-info epl helm-flx helm-descbinds helm-ag flx-ido flx fancy-battery evil-mc evil-lisp-state evil-indent-plus evil-exchange evil-escape evil-ediff evil-args anzu undo-tree highlight s diminish clean-aindent-mode bind-key packed ace-jump-helm-line avy popup package-build spacemacs-theme ws-butler window-numbering uuidgen restart-emacs quelpa popwin pcre2el open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete highlight-parentheses hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-iedit-state evil-anzu elisp-slime-nav column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
  '(safe-local-variable-values (quote ((encoding . UTF-8)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
