@@ -70,6 +70,7 @@ values."
           )
      sql
      (python :variables
+			 ;;python-backend 'lsp
              python-shell-completion-native nil
              python-test-runner 'pytest
              python-enable-yapf-format-on-save nil)
@@ -85,6 +86,9 @@ values."
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
+     ;;(c-c++ :variables c-c++-enable-clang-support t)
+     (c-c++ :variables c-c++-backend 'lsp-ccls
+			c-c++-lsp-sem-highlight-rainbow t)
      ;; version-control
      ;;twocucao
      )
@@ -422,7 +426,9 @@ you should place your code here."
   (defun ly/set-python-path ()
     "Restart Python inferior processes."
     (interactive)
-    (setenv "PYTHONPATH" (concat ":/home/ly/work/bell_payment/.venv/lib/python36.zip:/home/ly/work/bell_payment/.venv/lib/python3.6:/home/ly/work/bell_payment/.venv/lib/python3.6/lib-dynload:/home/ly/.pyenv/versions/3.6.6/lib/python3.6:/home/ly/work/bell_payment/.venv/lib/python3.6/site-packages:/home/ly/.pyenv/versions/3.6.6/lib/python3.6/site-packages:" (getenv "PYTHONPATH"))))
+    (setenv "PYTHONPATH" (concat ":/home/ly/.pyenv/versions/3.6.6/lib/python3.6/site-packages:" (
+getenv "PYTHONPATH"))))
+
   (defun open-time-log()
     (interactive)
     (find-file org-agenda-file-time-log)
@@ -445,7 +451,7 @@ you should place your code here."
     )
   (defun show-wider-tab ()
 	(setq tab-width 4))
-  
+
   ;; the %i would copy the selected text into the template
   ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
   ;;add multi-file journal
@@ -511,7 +517,7 @@ you should place your code here."
   (setq calendar-holidays
       (append cal-china-x-important-holidays
               cal-china-x-general-holidays
-              )) 
+              ))
   (add-hook 'python-mode-hook 'electric-spacing-mode)
   (add-hook 'python-mode-hook 'sphinx-doc-mode)
   (add-hook 'sh-mode-hook 'show-wider-tab)
@@ -525,7 +531,7 @@ you should place your code here."
         (comment-or-uncomment-region (line-beginning-position) (line-end-position))
       (comment-dwim arg)))
   (global-set-key "\M-;" 'qiang-comment-dwim-line)
-  
+
   ;;; bind key recentf-ido-find-file
   (defun recentf-ido-find-file ()
     "Find a recent file using ido."
@@ -553,12 +559,73 @@ you should place your code here."
       )
     "Init lines to add to empty python files."
     )
-  
+
   (add-hook 'after-change-major-mode-hook
             '(lambda ()
                (code-initlines py-init-lines 'python-mode)
                )
             )
+
+  ;; Bind clang-format-region to C-M-tab in all modes:
+  ;; (global-set-key [C-M-tab] 'clang-format-region)
+  ;;(spacemacs/set-leader-keys-for-major-mode 'c-or-c++-mode
+  ;;  "fr" 'clang-format-region
+  ;;  )
+  ;; Bind clang-format-buffer to tab on the c++-mode only:
+  ;(add-hook 'c-mode-common-hook 'clang-format-bindings)
+  ;;(defun clang-format-bindings ()
+  ;;  (define-key c-mode-base-map [tab] 'clang-format-buffer))
+
+
+  ;; https://emacs.stackexchange.com/questions/12841/quickly-insert-source-blocks-in-org-mode/40914#40914
+  (defvar org-sai-src-default "python"
+   "This is the list used to store the default label for source code section.")
+
+  (defun org-insert-src-block ()
+    "Insert the source code section in `org-mode'."
+    (interactive)
+    (let* ((src-code-types
+            '("emacs-lisp" "python" "C" "sh" "java" "js" "clojure" "C++" "css"
+              "calc" "asymptote" "dot" "gnuplot" "ledger" "lilypond" "mscgen"
+              "octave" "oz" "plantuml" "R" "sass" "screen" "sql" "awk" "ditaa"
+              "haskell" "latex" "lisp" "matlab" "ocaml" "org" "perl" "ruby"
+              "scheme" "sqlite"))
+           (src-prompt-str
+            (concat "Source code type (default "
+                    org-sai-src-default
+                    "): "))
+           (temp-src-code-types
+            (cons org-sai-src-default src-code-types))
+           (src-type-str
+            (completing-read src-prompt-str temp-src-code-types
+                             nil nil nil nil org-sai-src-default)))
+      (setq org-sai-src-default src-type-str))
+      (insert (format "#+BEGIN_SRC %s\n" org-sai-src-default))
+      (newline)
+      (org-indent-line)
+      (insert "#+END_SRC\n")
+      (forward-line -2))
+
+  ;; org babel
+  (require 'ob)
+  (require 'ob-shell)
+  (require 'ob-python)
+  (require 'ob-R)
+  (setq org-src-fontify-natively t)
+  (setq org-confirm-babel-evaluate nil)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (emacs-lisp . t)
+     (shell . t)
+     (R . t)
+     (dot . t)
+     ))
+  (defun org-babel-execute:yaml (body params) body)
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode
+      "oe" 'org-edit-src-code
+      "oi" 'org-insert-src-block
+  )
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
