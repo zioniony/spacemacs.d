@@ -70,7 +70,7 @@ values."
           )
      sql
      (python :variables
-			 ;;python-backend 'lsp
+			 python-backend 'lsp
              python-shell-completion-native nil
              python-test-runner 'pytest
              python-enable-yapf-format-on-save nil)
@@ -89,6 +89,7 @@ values."
      ;;(c-c++ :variables c-c++-enable-clang-support t)
      (c-c++ :variables c-c++-backend 'lsp-ccls
 			c-c++-lsp-sem-highlight-rainbow t)
+	 dap
      ;; version-control
      ;;twocucao
      )
@@ -575,6 +576,7 @@ getenv "PYTHONPATH"))))
   ;(add-hook 'c-mode-common-hook 'clang-format-bindings)
   ;;(defun clang-format-bindings ()
   ;;  (define-key c-mode-base-map [tab] 'clang-format-buffer))
+  (setq flycheck-checker-error-threshold 1000)
 
 
   ;; https://emacs.stackexchange.com/questions/12841/quickly-insert-source-blocks-in-org-mode/40914#40914
@@ -658,7 +660,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-plus-contrib writeroom-mode visual-fill-column treemacs-projectile treemacs-evil pfuture closql emacsql-sqlite emacsql transient lv auto-complete-rst zeal-at-point unfill fuzzy flymd request-deferred deferred company-ansible vue-mode flycheck-pos-tip xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode dash-at-point counsel-dash helm-dash web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode less-css-mode json-snatcher json-reformat js2-refactor js-doc insert-shebang helm-css-scss fish-mode emmet-mode company-web web-completion-data company-tern dash-functional company-shell coffee-mode yapfify pyenv-mode py-isort hy-mode helm-pydoc anaconda-mode youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy org org-pomodoro alert log4e gntp mmm-mode markdown-toc magit-gitflow launchctl helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-messenger gh-md company-statistics company auto-yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode parent-mode helm-themes helm-swoop helm-projectile helm-mode-manager pkg-info epl helm-flx helm-descbinds helm-ag flx-ido flx fancy-battery evil-mc evil-lisp-state evil-indent-plus evil-exchange evil-escape evil-ediff evil-args anzu undo-tree highlight s diminish clean-aindent-mode bind-key packed ace-jump-helm-line avy popup package-build spacemacs-theme ws-butler window-numbering uuidgen restart-emacs quelpa popwin pcre2el open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete highlight-parentheses hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-iedit-state evil-anzu elisp-slime-nav column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
+    (org-re-reveal org-plus-contrib writeroom-mode visual-fill-column treemacs-projectile treemacs-evil pfuture closql emacsql-sqlite emacsql transient lv auto-complete-rst zeal-at-point unfill fuzzy flymd request-deferred deferred company-ansible vue-mode flycheck-pos-tip xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode dash-at-point counsel-dash helm-dash web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode less-css-mode json-snatcher json-reformat js2-refactor js-doc insert-shebang helm-css-scss fish-mode emmet-mode company-web web-completion-data company-tern dash-functional company-shell coffee-mode yapfify pyenv-mode py-isort hy-mode helm-pydoc anaconda-mode youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy org org-pomodoro alert log4e gntp mmm-mode markdown-toc magit-gitflow launchctl helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-messenger gh-md company-statistics company auto-yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode parent-mode helm-themes helm-swoop helm-projectile helm-mode-manager pkg-info epl helm-flx helm-descbinds helm-ag flx-ido flx fancy-battery evil-mc evil-lisp-state evil-indent-plus evil-exchange evil-escape evil-ediff evil-args anzu undo-tree highlight s diminish clean-aindent-mode bind-key packed ace-jump-helm-line avy popup package-build spacemacs-theme ws-butler window-numbering uuidgen restart-emacs quelpa popwin pcre2el open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete highlight-parentheses hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-iedit-state evil-anzu elisp-slime-nav column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
  '(safe-local-variable-values (quote ((encoding . UTF-8)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
