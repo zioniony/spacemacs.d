@@ -90,6 +90,7 @@ values."
      (c-c++ :variables c-c++-backend 'lsp-ccls
 			c-c++-lsp-sem-highlight-rainbow t)
 	 dap
+	 java
      ;; version-control
      ;;twocucao
      )
@@ -453,6 +454,10 @@ getenv "PYTHONPATH"))))
   (defun show-wider-tab ()
 	(setq tab-width 4))
 
+  ;; set eclim for java
+  (setq eclim-eclipse-dirs '("/usr/lib/eclipse")
+        eclim-executable "/usr/lib/eclipse/eclim"
+		eclimd-default-workspace "~/work/eclipse")
   ;; the %i would copy the selected text into the template
   ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
   ;;add multi-file journal
