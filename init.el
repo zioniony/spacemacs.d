@@ -77,9 +77,9 @@ values."
      ;; ipython-notebook
      ;; django
      restructuredtext
-     (chinese :packages youdao-dictionary fcitx
+     (chinese :packages fcitx
               :variables chinese-enable-fcitx nil
-              chinese-enable-youdao-dict t)
+              )
      ;; (shell :variables
      ;;        shell-default-term-shell "/bin/zsh"
      ;;        shell-default-height 30
@@ -91,6 +91,7 @@ values."
 			c-c++-lsp-sem-highlight-rainbow t)
 	 dap
 	 java
+   zion
      ;; version-control
      ;;twocucao
      )
@@ -98,14 +99,12 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(youdao-dictionary
-                                      xah-replace-pairs
+   dotspacemacs-additional-packages '(xah-replace-pairs
 									  ag
 									  cal-china-x
 									  electric-spacing
 									  ess
 									  highlight-thing
-									  sphinx-doc
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -500,19 +499,27 @@ getenv "PYTHONPATH"))))
   ;   'helm-ff-candidates-lisp-p))
   (setq helm-follow-mode-persistent t)
 
+  (defun show-python-defun ()
+     ""
+     (interactive)
+     (message (python-info-current-defun))
+     )
   ;;(evil-set-initial-state 'inferior-python-mode 'emacs)
-  (spacemacs/set-leader-keys "oy" 'youdao-dictionary-search-at-point+)
-  (spacemacs/set-leader-keys "op" 'youdao-dictionary-search-at-point-tooltip)
+  (spacemacs/set-leader-keys "oy" 'sdcv-search-pointer+)
+  (spacemacs/set-leader-keys "op" 'sdcv-search-pointer)
   (spacemacs/set-leader-keys "of" 'find-name-dired)
   (spacemacs/set-leader-keys "jQ" 'dumb-jump-go)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode
-      "fi" (lambda () (interactive) (message (python-info-current-defun)))
+      "fi" 'show-python-defun
       "fa" 'beginning-of-defun
       "fe" 'end-of-defun
       "fh" 'python-mark-defun
       "fr" 'load-full-python-layer
+      "fd" 'sphinx-doc
+	  "fv" 'spacemacs//pyenv-mode-set-local-version
   )
 
+  
   ;; helm-find-files ignored pattern is on helm-boring-file-regexp-list.
   (setq helm-ff-skip-boring-files 't)
   (setq neo-show-hidden-files nil)
@@ -526,26 +533,49 @@ getenv "PYTHONPATH"))))
               cal-china-x-general-holidays
               ))
 
+  (setq simple-python-mode-hook (list 'electric-spacing-mode 'turn-on-evil-matchit-mode 'sphinx-doc-mode 'spacemacs//python-default 'spacemacs//init-jump-handlers-python-mode))
+  (setq default-python-mode-hook (list 'electric-spacing-mode 'turn-on-evil-matchit-mode 'sphinx-doc-mode 'spacemacs//python-default 'spacemacs//init-jump-handlers-python-mode 'importmagic-mode 'spacemacs//python-setup-backend))
+
   (defun load-full-python-layer (&optional backend)
     "reload python file with all python-mode-hook and python-backend enabled"
     (interactive)
     (progn
       (setq my-python-backend python-backend)
-      (setq python-mode-hook my-python-mode-hook)
+      (setq python-mode-hook default-python-mode-hook)
       (and backend (setq python-backend backend))
       (find-alternate-file (buffer-file-name))
-      (setq python-mode-hook (list))
+      (setq python-mode-hook simple-python-mode-hook)
       (setq python-backend my-python-backend)
       (message (format "reloaded: %s." (buffer-file-name)))
       )
     )
+  (defun simplify-python-mode-hook ()
+    "reset python-mode-hook"
+    (interactive)
+    (setq python-mode-hook simple-python-mode-hook)
+    )
+  (setq zion-previous-project-name "nil")
+
+  (defun zion-project-change-pyenv-version ()
+    "set pyenv version when change project"
+    (interactive)
+	;"widget-button-press" "spacemacs/helm-find-buffers-windows" "spacemacs/helm-find-files-windows"
+    (when (and (derived-mode-p 'python-mode)
+			   (not (string= (projectile-project-name) zion-previous-project-name))
+			   )
+	  (progn
+		(setq zion-previous-project-name (or (projectile-project-name) "nil"))
+		(spacemacs//pyenv-mode-set-local-version)
+		)
+      )
+    )
 
   (add-hook 'python-mode-hook 'electric-spacing-mode)
-  (add-hook 'python-mode-hook 'sphinx-doc-mode)
-  (setq my-python-mode-hook python-mode-hook)
-  (setq python-mode-hook (list))
+  (remove-hook 'python-mode-hook 'spacemacs//pyvenv-mode-set-local-virtualenv)
+  (add-hook 'python-mode-hook 'simplify-python-mode-hook)
   (add-hook 'sh-mode-hook 'show-wider-tab)
-  ;;(add-hook 'pyvenv-pre-activate-hooks 'ly/set-python-path)
+  (add-hook 'projectile-after-switch-project-hook 'zion-project-change-pyenv-version)
+  (add-hook 'post-command-hook 'zion-project-change-pyenv-version)
 
   (defun qiang-comment-dwim-line (&optional arg)
     "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line, then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
@@ -683,8 +713,9 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (fullframe org-re-reveal org-plus-contrib writeroom-mode visual-fill-column treemacs-projectile treemacs-evil pfuture closql emacsql-sqlite emacsql transient lv auto-complete-rst zeal-at-point unfill fuzzy flymd request-deferred deferred company-ansible vue-mode flycheck-pos-tip xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode dash-at-point counsel-dash helm-dash web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode less-css-mode json-snatcher json-reformat js2-refactor js-doc insert-shebang helm-css-scss fish-mode emmet-mode company-web web-completion-data company-tern dash-functional company-shell coffee-mode yapfify pyenv-mode py-isort hy-mode helm-pydoc anaconda-mode youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy org org-pomodoro alert log4e gntp mmm-mode markdown-toc magit-gitflow launchctl helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-messenger gh-md company-statistics company auto-yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode parent-mode helm-themes helm-swoop helm-projectile helm-mode-manager pkg-info epl helm-flx helm-descbinds helm-ag flx-ido flx fancy-battery evil-mc evil-lisp-state evil-indent-plus evil-exchange evil-escape evil-ediff evil-args anzu undo-tree highlight s diminish clean-aindent-mode bind-key packed ace-jump-helm-line avy popup package-build spacemacs-theme ws-butler window-numbering uuidgen restart-emacs quelpa popwin pcre2el open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete highlight-parentheses hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-iedit-state evil-anzu elisp-slime-nav column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
- '(safe-local-variable-values (quote ((encoding . UTF-8)))))
+    (python-docstring posframe fullframe org-re-reveal org-plus-contrib writeroom-mode visual-fill-column treemacs-projectile treemacs-evil pfuture closql emacsql-sqlite emacsql transient lv auto-complete-rst zeal-at-point unfill fuzzy flymd request-deferred deferred company-ansible vue-mode flycheck-pos-tip xah-replace-pairs nginx-mode magit-gh-pulls gmail-message-mode ham-mode html-to-markdown github-search github-clone github-browse-file gist gh marshal logito pcache jinja2-mode ansible-doc ansible yaml-mode ox-gfm ein websocket pony-mode dash-at-point counsel-dash helm-dash web-beautify tagedit sql-indent slim-mode scss-mode sass-mode pug-mode livid-mode skewer-mode less-css-mode json-snatcher json-reformat js2-refactor js-doc insert-shebang helm-css-scss fish-mode emmet-mode company-web web-completion-data company-tern dash-functional company-shell coffee-mode yapfify pyenv-mode py-isort hy-mode helm-pydoc anaconda-mode youdao-dictionary names chinese-word-at-point wgrep smex ivy-hydra pangu-spacing find-by-pinyin-dired chinese-pyim chinese-pyim-basedict pos-tip ace-pinyin pinyinlib ace-jump-mode smeargle pbcopy org org-pomodoro alert log4e gntp mmm-mode markdown-toc magit-gitflow launchctl helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-messenger gh-md company-statistics company auto-yasnippet ac-ispell auto-complete volatile-highlights vi-tilde-fringe rainbow-delimiters spinner org-bullets neotree lorem-ipsum ido-vertical-mode parent-mode helm-themes helm-swoop helm-projectile helm-mode-manager pkg-info epl helm-flx helm-descbinds helm-ag flx-ido flx fancy-battery evil-mc evil-lisp-state evil-indent-plus evil-exchange evil-escape evil-ediff evil-args anzu undo-tree highlight s diminish clean-aindent-mode bind-key packed ace-jump-helm-line avy popup package-build spacemacs-theme ws-butler window-numbering uuidgen restart-emacs quelpa popwin pcre2el open-junk-file move-text macrostep linum-relative link-hint info+ indent-guide hungry-delete highlight-parentheses hide-comnt help-fns+ golden-ratio fill-column-indicator expand-region exec-path-from-shell evil-visualstar evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-iedit-state evil-anzu elisp-slime-nav column-enforce-mode bind-map auto-highlight-symbol auto-compile async aggressive-indent adaptive-wrap ace-window ace-link)))
+ '(safe-local-variable-values (quote ((encoding . UTF-8))))
+ '(sdcv-tooltip-timeout 60))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
