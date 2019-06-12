@@ -559,14 +559,15 @@ getenv "PYTHONPATH"))))
   (defun zion-project-change-pyenv-version ()
     "set pyenv version when change project"
     (interactive)
-	;"widget-button-press" "spacemacs/helm-find-buffers-windows" "spacemacs/helm-find-files-windows"
+                                        ;"widget-button-press" "spacemacs/helm-find-buffers-windows" "spacemacs/helm-find-files-windows"
     (when (and (derived-mode-p 'python-mode)
-			   (not (string= (projectile-project-name) zion-previous-project-name))
-			   )
-	  (progn
-		(setq zion-previous-project-name (or (projectile-project-name) "nil"))
-		(spacemacs//pyenv-mode-set-local-version)
-		)
+               (not (string= (projectile-project-name) zion-previous-project-name))
+               )
+      (progn
+        (setq zion-previous-project-name (or (projectile-project-name) "nil"))
+        (if (fboundp 'pyenv-mode-versions) nil (pyenv-mode))
+        (spacemacs//pyenv-mode-set-local-version)
+        )
       )
     )
 
