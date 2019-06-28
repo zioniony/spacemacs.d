@@ -70,13 +70,14 @@ Each entry is either:
   (setq sdcv-dictionary-simple-list        ;; a simple dictionary list
 		'(
 		  "牛津英汉双解美化版"
-		  "Longman Dictionary of Contemporary English (4th Ed)"
+		  "LongmanDictionaryofContemporaryEnglish"
 		  "朗道英汉字典5.0"
 		  "懒虫简明英汉词典"
 		  "DrEye4in1词典"
 		  ))
   (custom-set-variables
 	'(sdcv-tooltip-timeout 60)
+	'(sdcv-popup-function (quote popup-tip))
 	)
   )
 
