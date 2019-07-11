@@ -517,6 +517,7 @@ getenv "PYTHONPATH"))))
       "fr" 'load-full-python-layer
       "fd" 'sphinx-doc
 	  "fv" 'spacemacs//pyenv-mode-set-local-version
+	  "ft" 'buffer-init-python
   )
 
   
@@ -595,14 +596,19 @@ getenv "PYTHONPATH"))))
       (when file
         (find-file file))))
 
-  (defun code-initlines (lines mode)
-    "Add initial LINES to specific MODE."
-    (when (and (equal major-mode mode) (equal 0 (buffer-size)))
+  (defun buffer-initlines (lines)
+    "Add initial LINES to current buffer."
       (loop for line in lines
             do (progn
                  (insert line)
                  (newline))
             )
+      )
+
+  (defun code-initlines (lines mode)
+    "Add initial LINES to specific MODE."
+    (when (and (equal major-mode mode) (equal 0 (buffer-size)))
+       (buffer-initlines lines)
       ))
 
   (defvar py-init-lines
@@ -614,6 +620,12 @@ getenv "PYTHONPATH"))))
       )
     "Init lines to add to empty python files."
     )
+
+  (defun buffer-init-python ()
+    "Add initial python LINES to current buffer."
+      (interactive)
+	  (buffer-initlines py-init-lines)
+      )
 
   (add-hook 'after-change-major-mode-hook
             '(lambda ()
