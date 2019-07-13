@@ -491,6 +491,7 @@ getenv "PYTHONPATH"))))
   ;;(desktop-read)
   ;; https://github.com/emacs-helm/helm/wiki/FAQ#why-is-a-customizable-helm-source-nil
   (require 'helm)
+  (require 'ag)
   ;(defmethod helm-setup-user-source ((source helm-source-ffiles))
   ;  (helm-source-add-action-to-source-if
   ;   "Byte compile file(s) async"
@@ -516,8 +517,9 @@ getenv "PYTHONPATH"))))
       "fh" 'python-mark-defun
       "fr" 'load-full-python-layer
       "fd" 'sphinx-doc
-	  "fv" 'spacemacs//pyenv-mode-set-local-version
-	  "ft" 'buffer-init-python
+      "fv" 'spacemacs//pyenv-mode-set-local-version
+      "ft" 'buffer-init-python
+      "ff" 'ag-python-files
   )
 
   
@@ -626,6 +628,16 @@ getenv "PYTHONPATH"))))
       (interactive)
 	  (buffer-initlines py-init-lines)
       )
+
+  (defun ag-python-files (string directory)
+    "Search using ag in a given DIRECTORY for a given literal search STRING,
+limited to python files. STRING defaults to the
+symbol under point.
+
+If called with a prefix, prompts for flags to pass to ag."
+    (interactive (list (ag/read-from-minibuffer "Search string")
+                       (read-directory-name "Directory: ")))
+    (apply #'ag/search string directory '(:file-type "python")))
 
   (add-hook 'after-change-major-mode-hook
             '(lambda ()
