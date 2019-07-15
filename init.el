@@ -637,7 +637,7 @@ symbol under point.
 If called with a prefix, prompts for flags to pass to ag."
     (interactive (list (ag/read-from-minibuffer "Search string")
                        (read-directory-name "Directory: ")))
-    (apply #'ag/search string directory '(:file-type "python")))
+    (apply #'ag/search string directory :regexp t '(:file-type "python")))
 
   (add-hook 'after-change-major-mode-hook
             '(lambda ()
