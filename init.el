@@ -352,6 +352,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  (setq-default with-editor-emacsclient-executable "emacsclient")
   ;;; for master branch
   ;; (setq configuration-layer--elpa-archives
   ;;     '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
@@ -729,6 +730,12 @@ If called with a prefix, prompts for flags to pass to ag."
       "oe" 'org-edit-src-code
       "oi" 'org-insert-src-block
   )
+  (defun spacemacs//python-setup-shell (&rest args)
+    (progn
+      (setq python-shell-interpreter-args "-i")
+      (setq python-shell-interpreter "python")
+      )
+    )
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
